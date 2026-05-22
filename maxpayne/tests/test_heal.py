@@ -4,10 +4,7 @@ from maxpayne.heal import build_sanitized_env_example, heal_dependency, heal_env
 
 
 def test_build_sanitized_env_example_creates_placeholders() -> None:
-    source = "API_KEY=secret
-DEBUG=true
-# comment
-"
+    source = "API_KEY=secret\nDEBUG=true\n# comment\n"
 
     rendered = build_sanitized_env_example(source)
 
@@ -18,8 +15,7 @@ DEBUG=true
 
 def test_heal_env_files_creates_example_when_missing(tmp_path: Path) -> None:
     env_path = tmp_path / ".env"
-    env_path.write_text("TOKEN=abc123
-", encoding="utf-8")
+    env_path.write_text("TOKEN=abc123\n", encoding="utf-8")
 
     result = heal_env_files(project_dir=tmp_path)
 
