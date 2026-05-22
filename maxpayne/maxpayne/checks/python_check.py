@@ -1,9 +1,11 @@
 """Python and pip checks."""
 
-import shutil
+from __future__ import annotations
+
 import sys
 
 from maxpayne.core.result import CheckResult
+from maxpayne.core.system import command_exists
 
 MIN_PYTHON = (3, 11)
 
@@ -27,12 +29,16 @@ def run_python_checks() -> list[CheckResult]:
         )
     )
 
-    pip_available = shutil.which("pip") is not None or shutil.which("pip3") is not None
+    pip_available, pip_command = command_exists("pip", "pip3", "pip.exe")
     results.append(
         CheckResult(
             name="python.pip",
             status="PASS" if pip_available else "FAIL",
-            message="pip is available." if pip_available else "pip was not found in PATH.",
+            message=(
+                f"pip is available via `{pip_command}`."
+                if pip_available
+                else "pip was not found in PATH."
+            ),
             suggestion=(
                 "No action required."
                 if pip_available

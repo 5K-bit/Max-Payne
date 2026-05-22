@@ -29,3 +29,22 @@ def test_runner_raises_for_unknown_group() -> None:
         assert "Unknown check group" in str(exc)
     else:
         raise AssertionError("Expected ValueError for missing group")
+
+
+def test_runner_continues_when_a_group_crashes() -> None:
+    def _crashing_group() -> list[CheckResult]:
+        raise RuntimeError("boom")
+
+    runner = CheckRunner(
+        checks={
+            "good": lambda: [CheckResult("check.good", "PASS", "ok", "none")],
+            "bad": _crashing_group,
+        }
+    )
+
+    results = runner.run_all()
+
+    assert len(results) == 2
+    assert results[0].name == "check.good"
+    assert results[1].name == "bad.runtime"
+    assert results[1].status == "FAIL"

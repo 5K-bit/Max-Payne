@@ -1,29 +1,37 @@
 """Git checks."""
 
-import shutil
-import subprocess
+from __future__ import annotations
 
 from maxpayne.core.result import CheckResult
+from maxpayne.core.system import command_exists, run_command
 
 
-def _read_git_config(key: str) -> str | None:
-    command = ["git", "config", "--global", "--get", key]
-    completed = subprocess.run(command, capture_output=True, text=True, check=False)
+def _read_git_config(key: str) -> tuple[str | None, str | None]:
+    completed = run_command(["git", "config", "--global", "--get", key])
+    if completed.timed_out:
+        return None, "Timed out reading git config."
+    if completed.error:
+        return None, completed.error
     if completed.returncode != 0:
-        return None
+        return None, completed.stderr or None
+
     value = completed.stdout.strip()
-    return value or None
+    return (value or None), None
 
 
 def run_git_checks() -> list[CheckResult]:
     results: list[CheckResult] = []
 
-    git_available = shutil.which("git") is not None
+    git_available, git_command = command_exists("git", "git.exe")
     results.append(
         CheckResult(
             name="git.available",
             status="PASS" if git_available else "FAIL",
-            message="git is available." if git_available else "git was not found in PATH.",
+            message=(
+                f"git is available via `{git_command}`."
+                if git_available
+                else "git was not found in PATH."
+            ),
             suggestion=(
                 "No action required."
                 if git_available
@@ -35,10 +43,15 @@ def run_git_checks() -> list[CheckResult]:
     if not git_available:
         return results
 
-    git_name = _read_git_config("user.name")
-    git_email = _read_git_config("user.email")
+    git_name, git_name_error = _read_git_config("user.name")
+    git_email, git_email_error = _read_git_config("user.email")
     identity_configured = bool(git_name and git_email)
-    detail = f"user.name={git_name or '<unset>'}, user.email={git_email or '<unset>'}"
+
+    details_parts = [f"user.name={git_name or '<unset>'}", f"user.email={git_email or '<unset>'}"]
+    if git_name_error:
+        details_parts.append(f"name_error={git_name_error}")
+    if git_email_error:
+        details_parts.append(f"email_error={git_email_error}")
 
     results.append(
         CheckResult(
@@ -47,15 +60,15 @@ def run_git_checks() -> list[CheckResult]:
             message=(
                 "Global git identity is configured."
                 if identity_configured
-                else "Global git identity is incomplete."
+                else "Global git identity is incomplete or unavailable."
             ),
             suggestion=(
                 "No action required."
                 if identity_configured
-                else "Run `git config --global user.name \"Your Name\"` and "
-                "`git config --global user.email \"you@example.com\"`."
+                else "Run `git config --global user.name "Your Name"` and "
+                "`git config --global user.email "you@example.com"`."
             ),
-            details=detail,
+            details=", ".join(details_parts),
         )
     )
 

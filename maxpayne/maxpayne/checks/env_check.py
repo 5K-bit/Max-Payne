@@ -1,8 +1,11 @@
-"""Project environment checks."""
+"""Project and environment checks."""
+
+from __future__ import annotations
 
 from pathlib import Path
 
 from maxpayne.core.result import CheckResult
+from maxpayne.core.system import detect_platform
 
 
 def run_env_checks() -> list[CheckResult]:
@@ -12,10 +15,19 @@ def run_env_checks() -> list[CheckResult]:
     pyproject_file = cwd / "pyproject.toml"
     requirements_file = cwd / "requirements.txt"
 
+    system_name, is_wsl = detect_platform()
+    platform_suffix = " (WSL)" if is_wsl else ""
+
     env_example_ok = not env_file.exists() or env_example_file.exists()
     dependencies_file_ok = pyproject_file.exists() or requirements_file.exists()
 
     results = [
+        CheckResult(
+            name="system.platform",
+            status="PASS",
+            message=f"Detected platform: {system_name}{platform_suffix}.",
+            suggestion="No action required.",
+        ),
         CheckResult(
             name="env.example",
             status="PASS" if env_example_ok else "WARN",

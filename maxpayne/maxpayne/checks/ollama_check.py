@@ -1,34 +1,37 @@
 """Ollama checks."""
 
-import shutil
+from __future__ import annotations
 
-import psutil
+import socket
 
 from maxpayne.core.result import CheckResult
+from maxpayne.core.system import command_exists
 
+OLLAMA_HOST = "127.0.0.1"
 OLLAMA_PORT = 11434
+SOCKET_TIMEOUT_SECONDS = 1.0
 
 
-def _is_port_listening(port: int) -> bool:
-    for connection in psutil.net_connections(kind="inet"):
-        local = connection.laddr
-        if not local:
-            continue
-        if local.port == port and connection.status == psutil.CONN_LISTEN:
-            return True
-    return False
+def _is_ollama_server_reachable() -> tuple[bool, str | None]:
+    try:
+        with socket.create_connection((OLLAMA_HOST, OLLAMA_PORT), timeout=SOCKET_TIMEOUT_SECONDS):
+            return True, None
+    except TimeoutError:
+        return False, "Connection timed out while checking localhost:11434."
+    except OSError as exc:
+        return False, str(exc)
 
 
 def run_ollama_checks() -> list[CheckResult]:
     results: list[CheckResult] = []
 
-    ollama_available = shutil.which("ollama") is not None
+    ollama_available, ollama_command = command_exists("ollama", "ollama.exe")
     results.append(
         CheckResult(
             name="ollama.available",
             status="PASS" if ollama_available else "FAIL",
             message=(
-                "ollama CLI is available."
+                f"ollama CLI is available via `{ollama_command}`."
                 if ollama_available
                 else "ollama CLI was not found in PATH."
             ),
@@ -40,28 +43,22 @@ def run_ollama_checks() -> list[CheckResult]:
         )
     )
 
-    try:
-        server_running = _is_port_listening(OLLAMA_PORT)
-        details = None
-    except psutil.AccessDenied:
-        server_running = False
-        details = "Unable to inspect local ports due to permission limits."
-
+    server_running, error = _is_ollama_server_reachable()
     results.append(
         CheckResult(
             name="ollama.server",
             status="PASS" if server_running else "WARN",
             message=(
-                f"Ollama server appears to be listening on localhost:{OLLAMA_PORT}."
+                f"Ollama server is reachable at {OLLAMA_HOST}:{OLLAMA_PORT}."
                 if server_running
-                else f"Ollama server is not listening on localhost:{OLLAMA_PORT}."
+                else f"Ollama server is not reachable at {OLLAMA_HOST}:{OLLAMA_PORT}."
             ),
             suggestion=(
                 "No action required."
                 if server_running
                 else "Start Ollama (`ollama serve`) before running local models."
             ),
-            details=details,
+            details=error,
         )
     )
 
