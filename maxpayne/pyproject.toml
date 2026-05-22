@@ -22,7 +22,7 @@ dev = [
 ]
 
 [project.scripts]
-maxpayne = "maxpayne.cli:main"
+maxpayne = "maxpayne.cli:app"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
