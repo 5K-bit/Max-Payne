@@ -12,6 +12,7 @@ from maxpayne.checks.node_check import run_node_checks
 from maxpayne.checks.ollama_check import run_ollama_checks
 from maxpayne.checks.ports_check import run_ports_checks
 from maxpayne.checks.python_check import run_python_checks
+from maxpayne.checks.windows_check import run_windows_checks
 from maxpayne.core.result import CheckResult
 
 CheckGroup = Callable[[], list[CheckResult]]
@@ -30,6 +31,7 @@ class CheckRunner:
             "ollama": run_ollama_checks,
             "ports": run_ports_checks,
             "env": run_env_checks,
+            "windows": run_windows_checks,
         }
 
     def run_all(self) -> list[CheckResult]:

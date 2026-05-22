@@ -8,15 +8,21 @@ import json
 import logging
 from pathlib import Path
 
+from rich.panel import Panel
 import typer
 
 from maxpayne.core.runner import CheckRunner
 from maxpayne.core.system import detect_platform
-from maxpayne.ui.console import render_results_table, render_summary, summary_counts
+from maxpayne.explain import explain_file
+from maxpayne.heal import apply_default_heal, heal_dependency, heal_env_files, heal_git_config, heal_port
+from maxpayne.ui.console import console, render_results_table, render_summary, summary_counts
 
 app = typer.Typer(help="MaxPayne - local developer environment doctor.")
 doctor_app = typer.Typer(help="Run a focused check group.")
+heal_app = typer.Typer(help="Apply targeted environment fixes.", invoke_without_command=True)
+
 app.add_typer(doctor_app, name="doctor")
+app.add_typer(heal_app, name="heal")
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +88,25 @@ def report(
     typer.echo(f"Report written to {output}")
 
 
+@app.command()
+def explain(
+    log_file: Path = typer.Argument(..., help="Path to crash log or traceback file."),
+    model: str = typer.Option("llama3.2", "--model", help="Local Ollama model to query."),
+) -> None:
+    """Explain a crash log in plain English using local Ollama when available."""
+    if not log_file.exists():
+        raise typer.BadParameter(f"File not found: {log_file}")
+
+    explanation = explain_file(log_file, model=model)
+    console.print(
+        Panel(
+            explanation.explanation,
+            title=f"MaxPayne Explain ({explanation.source})",
+            border_style="cyan",
+        )
+    )
+
+
 @doctor_app.command("python")
 def doctor_python() -> None:
     """Run Python-specific checks."""
@@ -104,6 +129,65 @@ def doctor_docker() -> None:
 def doctor_ollama() -> None:
     """Run Ollama-specific checks."""
     _run_single_group("ollama", "MaxPayne Doctor: Ollama")
+
+
+@doctor_app.command("windows")
+def doctor_windows() -> None:
+    """Run Windows-specific checks."""
+    _run_single_group("windows", "MaxPayne Doctor: Windows")
+
+
+@heal_app.callback(invoke_without_command=True)
+def heal_default(
+    ctx: typer.Context,
+    interactive: bool = typer.Option(False, "--interactive", help="Prompt before modifying settings."),
+) -> None:
+    """Apply safe default healing actions."""
+    if ctx.invoked_subcommand is not None:
+        return
+
+    results = apply_default_heal(interactive=interactive)
+    render_results_table(results, title="MaxPayne Heal")
+    render_summary(results)
+
+
+@heal_app.command("git")
+def heal_git(
+    interactive: bool = typer.Option(False, "--interactive", help="Prompt before setting missing values."),
+) -> None:
+    """Heal missing global git identity settings."""
+    result = heal_git_config(interactive=interactive)
+    render_results_table([result], title="MaxPayne Heal: Git")
+    render_summary([result])
+
+
+@heal_app.command("env")
+def heal_env() -> None:
+    """Heal `.env` / `.env.example` mismatch."""
+    result = heal_env_files()
+    render_results_table([result], title="MaxPayne Heal: Env")
+    render_summary([result])
+
+
+@heal_app.command("port")
+def heal_port_command(
+    port: int = typer.Argument(..., help="Port to free from listening processes."),
+    interactive: bool = typer.Option(False, "--interactive", help="Prompt before terminating processes."),
+) -> None:
+    """Free a busy local port."""
+    result = heal_port(port=port, interactive=interactive)
+    render_results_table([result], title=f"MaxPayne Heal: Port {port}")
+    render_summary([result])
+
+
+@heal_app.command("dependency")
+def heal_dependency_command(
+    package: str = typer.Argument(..., help="Dependency name to install into current Python environment."),
+) -> None:
+    """Install a missing Python dependency."""
+    result = heal_dependency(package)
+    render_results_table([result], title=f"MaxPayne Heal: Dependency {package}")
+    render_summary([result])
 
 
 def _run_single_group(group_name: str, title: str) -> None:

@@ -1,53 +1,86 @@
 # MaxPayne
 
-MaxPayne is a local developer environment doctor. It diagnoses common setup
-problems before they break a project.
+MaxPayne is a local developer environment doctor. It diagnoses and heals common setup pain before it breaks projects.
 MaxPayne is tested without requiring Docker, Node, Git, or Ollama to be installed.
 
-## Features
+## Quick visuals
 
-- Diagnose local tooling health in one command
-- Check Python, Git, Node, Docker, and Ollama readiness
-- Inspect common local ports for conflicts with PID/process details
-- Validate common project environment setup files
-- Export a JSON report for automation and troubleshooting
+![MaxPayne diagnose screenshot](docs/media/diagnose-screenshot.svg)
 
-## Requirements
-
-- Python 3.11+
+![MaxPayne terminal demo gif](docs/media/terminal-demo.gif)
 
 ## Installation
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
+python3 -m pip install -e .
+maxpayne diagnose
 ```
 
-## CLI Usage
+## Usage examples
 
 ```bash
+# Diagnose everything
 maxpayne diagnose
-maxpayne ports
-maxpayne report
-maxpayne report --output ./artifacts/diag.json
 
+# Export machine-readable report
+maxpayne report --output ./artifacts/maxpayne-report.json
+
+# Focused doctors
 maxpayne doctor python
 maxpayne doctor git
 maxpayne doctor docker
 maxpayne doctor ollama
+maxpayne doctor windows
 
-maxpayne --debug diagnose
+# Heal common issues
+maxpayne heal
+maxpayne heal --interactive
+maxpayne heal git
+maxpayne heal env
+maxpayne heal port 8000
+maxpayne heal dependency fastapi
+
+# Explain stack traces with local Ollama (falls back to heuristic mode)
+maxpayne explain crash.log
+maxpayne explain traceback.txt
 ```
 
-## Notes
+## Feature matrix
 
-- Subprocess checks are protected with a 3-second timeout.
-- A single failed check never stops remaining checks.
-- Platform detection supports Linux/Windows and flags WSL when detected.
+| Capability | Diagnose | Heal | Explain |
+|---|---:|---:|---:|
+| Python / pip checks | ✅ | ➖ | ➖ |
+| Git / Node / Docker / Ollama checks | ✅ | Git ✅ | ➖ |
+| Port occupancy with PID/process | ✅ | ✅ | ➖ |
+| `.env` / `.env.example` workflow | ✅ | ✅ | ➖ |
+| Windows pain checks (WSL, PATH, runtimes, launcher) | ✅ | ➖ | ➖ |
+| JSON report export | ✅ | ➖ | ➖ |
+| Crash log plain-English explanations | ➖ | ➖ | ✅ |
+
+## Roadmap
+
+- [x] MVP diagnostics (`diagnose`, `doctor`, `ports`)
+- [x] JSON report export (`report`)
+- [x] Heal mode (`heal` commands)
+- [x] Local AI explain mode (`explain`)
+- [ ] richer auto-fix recipes (toolchain bootstrap profiles)
+- [ ] CI/CD check bundle presets
+- [ ] publish to PyPI
 
 ## Development
 
 ```bash
+python3 -m pip install -e ".[dev]"
 pytest
 ```
+
+## Contributing
+
+1. Fork the repository and create a feature branch.
+2. Add focused changes with tests.
+3. Run `pytest` before opening a pull request.
+4. Keep CLI behavior cross-platform and failure-tolerant.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

@@ -5,10 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "maxpayne"
 version = "0.1.0"
-description = "Local developer environment doctor CLI."
+description = "Developer environment diagnostics CLI"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [{ name = "MaxPayne Contributors" }]
+license = { text = "MIT" }
 dependencies = [
   "psutil>=6.0.0",
   "rich>=13.7.0",
