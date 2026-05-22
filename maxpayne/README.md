@@ -2,6 +2,7 @@
 
 MaxPayne is a local developer environment doctor. It diagnoses common setup
 problems before they break a project.
+MaxPayne is tested without requiring Docker, Node, Git, or Ollama to be installed.
 
 ## Features
 

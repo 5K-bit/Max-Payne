@@ -11,6 +11,7 @@ from pathlib import Path
 import typer
 
 from maxpayne.core.runner import CheckRunner
+from maxpayne.core.system import detect_platform
 from maxpayne.ui.console import render_results_table, render_summary, summary_counts
 
 app = typer.Typer(help="MaxPayne - local developer environment doctor.")
@@ -64,11 +65,13 @@ def report(
     runner = CheckRunner()
     results = runner.run_all()
     pass_count, warn_count, fail_count = summary_counts(results)
+    platform_name, is_wsl = detect_platform()
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "platform": {"system": platform_name, "is_wsl": is_wsl},
         "summary": {"pass": pass_count, "warn": warn_count, "fail": fail_count},
-        "results": [asdict(result) for result in results],
+        "results": [{**asdict(result), "status": result.status.lower()} for result in results],
     }
 
     output.parent.mkdir(parents=True, exist_ok=True)
