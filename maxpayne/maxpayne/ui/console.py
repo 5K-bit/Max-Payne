@@ -29,8 +29,7 @@ def render_results_table(results: list[CheckResult], title: str = "MaxPayne Repo
     for result in results:
         message = result.message
         if result.details:
-            message = f"{message}
-[dim]{result.details}[/dim]"
+            message = f"{message}\n[dim]{result.details}[/dim]"
         table.add_row(result.name, _format_status(result.status), message, result.suggestion)
 
     console.print(table)

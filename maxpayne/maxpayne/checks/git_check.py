@@ -65,8 +65,8 @@ def run_git_checks() -> list[CheckResult]:
             suggestion=(
                 "No action required."
                 if identity_configured
-                else "Run `git config --global user.name "Your Name"` and "
-                "`git config --global user.email "you@example.com"`."
+                else "Run `git config --global user.name \"Your Name\"` and "
+                "`git config --global user.email \"you@example.com\"`."
             ),
             details=", ".join(details_parts),
         )
