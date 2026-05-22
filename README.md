@@ -1,5 +1,7 @@
 # MaxPayne
 
+[![CI](https://github.com/5K-bit/Max-Payne/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/5K-bit/Max-Payne/actions/workflows/ci.yml)
+
 MaxPayne is a local developer environment doctor. It diagnoses and heals common setup pain before it breaks projects.
 MaxPayne is tested without requiring Docker, Node, Git, or Ollama to be installed.
 
