@@ -1,14 +1,14 @@
-"""Core domain primitives for MaxPayne."""
+"""Core MaxPayne types and orchestration."""
 
-from .result import CheckResult
-from .runner import CheckRunner
-from .system import CommandResult, command_exists, detect_platform, run_command
+from maxpayne.core.engine import DiagnosticReport, MaxPayneEngine
+from maxpayne.core.registry import CheckRegistry
+from maxpayne.core.result import CheckResult
+from maxpayne.core.runner import CheckRunner
 
 __all__ = [
+    "CheckRegistry",
     "CheckResult",
     "CheckRunner",
-    "CommandResult",
-    "command_exists",
-    "detect_platform",
-    "run_command",
+    "DiagnosticReport",
+    "MaxPayneEngine",
 ]

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "maxpayne"
-version = "0.1.0"
-description = "Developer environment diagnostics CLI"
+version = "0.2.0"
+description = "Local developer environment health, diagnostics, and recovery engine"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [{ name = "MaxPayne Contributors" }]
@@ -19,6 +19,10 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "pytest>=8.2.0",
+]
+web = [
+  "fastapi>=0.115.0",
+  "uvicorn>=0.30.0",
 ]
 
 [project.scripts]
