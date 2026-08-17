@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "name": "maxpayne",
+  "component_type": "service",
+  "version": "0.2.0",
+  "entrypoint": "maxpayne",
+  "interfaces": ["python-api", "cli", "http"],
+  "capabilities": ["diagnostics", "health-aggregation", "history", "remediation"],
+  "lifecycle": "on-demand",
+  "health": {"path": "/api/health", "default_url": "http://127.0.0.1:8788/api/health"},
+  "dependencies": [],
+  "source_repository": "5K-bit/Max-Payne"
+}
