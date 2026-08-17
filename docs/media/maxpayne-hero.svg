@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">MaxPayne — Developer Environment Health and Recovery Engine</title>
+  <desc id="desc">Dark portfolio banner for the MaxPayne developer diagnostics project.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#080b10"/>
+      <stop offset="0.58" stop-color="#0d121a"/>
+      <stop offset="1" stop-color="#101a24"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5eead4"/>
+      <stop offset="1" stop-color="#38bdf8"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="360" rx="28" fill="url(#bg)"/>
+  <g opacity="0.12" stroke="#7dd3fc" stroke-width="1">
+    <path d="M0 64H1200M0 128H1200M0 192H1200M0 256H1200M0 320H1200"/>
+    <path d="M80 0V360M160 0V360M240 0V360M320 0V360M400 0V360M480 0V360M560 0V360M640 0V360M720 0V360M800 0V360M880 0V360M960 0V360M1040 0V360M1120 0V360"/>
+  </g>
+  <circle cx="1025" cy="145" r="112" fill="none" stroke="#38bdf8" stroke-opacity="0.14" stroke-width="2"/>
+  <circle cx="1025" cy="145" r="78" fill="none" stroke="#5eead4" stroke-opacity="0.18" stroke-width="2"/>
+  <path d="M942 145h36l17-33 31 69 24-49 18 13h39" fill="none" stroke="url(#accent)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+  <circle cx="1025" cy="145" r="6" fill="#5eead4"/>
+
+  <text x="72" y="112" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20" letter-spacing="5">LOCAL-FIRST SYSTEM HEALTH</text>
+  <text x="68" y="196" fill="#f8fafc" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="82" font-weight="800" letter-spacing="2">MAXPAYNE</text>
+  <rect x="70" y="218" width="550" height="5" rx="3" fill="url(#accent)"/>
+  <text x="72" y="266" fill="#cbd5e1" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24">Developer environment health &amp; recovery engine</text>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15">
+    <rect x="72" y="297" width="148" height="34" rx="17" fill="#111827" stroke="#334155"/>
+    <text x="95" y="319" fill="#5eead4">DIAGNOSE</text>
+    <rect x="234" y="297" width="118" height="34" rx="17" fill="#111827" stroke="#334155"/>
+    <text x="259" y="319" fill="#7dd3fc">EXPLAIN</text>
+    <rect x="366" y="297" width="150" height="34" rx="17" fill="#111827" stroke="#334155"/>
+    <text x="391" y="319" fill="#facc15">REMEDIATE</text>
+    <rect x="530" y="297" width="152" height="34" rx="17" fill="#111827" stroke="#334155"/>
+    <text x="556" y="319" fill="#c4b5fd">OBSERVE</text>
+  </g>
+
+  <g transform="translate(865 274)" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+    <circle cx="8" cy="8" r="8" fill="#34d399"/>
+    <text x="28" y="14" fill="#cbd5e1" font-size="15">ENGINE ONLINE</text>
+  </g>
+</svg>
