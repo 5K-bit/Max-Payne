@@ -14,9 +14,9 @@ def default_history_path() -> Path:
     return Path.home() / ".maxpayne" / "history.db"
 
 
-def create_app(engine: MaxPayneEngine | None = None, remediation_executor: RemediationExecutor | None = None):
+def create_app(engine: MaxPayneEngine | None = None, remediation_executor: RemediationExecutor | None = None, *, authorize_remediation=None):
     try:
-        from fastapi import FastAPI, HTTPException
+        from fastapi import FastAPI, HTTPException, Header
         from fastapi.responses import HTMLResponse
     except ImportError as exc:
         raise RuntimeError('Web support is not installed. Run `python -m pip install -e ".[web]"`.') from exc
@@ -35,8 +35,13 @@ def create_app(engine: MaxPayneEngine | None = None, remediation_executor: Remed
     def history(limit: int = 20) -> list[dict[str, object]]:
         return [] if active_engine.history is None else active_engine.history.list_scans(limit=limit)
     @app.post("/api/remediate/{remediation_id}")
-    def remediate(remediation_id: str, parameters: dict[str,str] | None = None, apply: bool = False, approved: bool = False) -> dict[str, object]:
-        try: return active_executor.execute(remediation_id, parameters=parameters, dry_run=not apply, approved=approved).to_dict()
+    def remediate(remediation_id: str, parameters: dict[str,str] | None = None, apply: bool = False, approved: bool = False, authorization: str | None = Header(default=None)) -> dict[str, object]:
+        granted = False
+        if apply:
+            granted = bool(authorize_remediation and authorize_remediation(remediation_id, parameters or {}, authorization))
+            if not granted:
+                raise HTTPException(status_code=403, detail="Applied remediation requires a Blackfong-issued approval grant")
+        try: return active_executor.execute(remediation_id, parameters=parameters, dry_run=not apply, approved=granted).to_dict()
         except (ValueError, TypeError) as exc: raise HTTPException(status_code=400, detail=str(exc)) from exc
     return app
 
