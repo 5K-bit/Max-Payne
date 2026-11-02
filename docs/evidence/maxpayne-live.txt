@@ -1,0 +1,158 @@
+### 2026-11-02T17:16:58Z base commit 87ac386 (+ --version, + dev extras), isolated HOME=/tmp/mp-home.EdVtAK
+$ maxpayne profiles
+all
+minimal
+workstation
+obeos
+exit=0
+$ maxpayne diagnose --profile workstation
+│                                     │        │ on            │ required.     │
+│                                     │        │ non-Windows   │               │
+│                                     │        │ platform.     │               │
+│ windows.side_by_side_runtime        │ PASS   │ Check skipped │ No action     │
+│                                     │        │ on            │ required.     │
+│                                     │        │ non-Windows   │               │
+│                                     │        │ platform.     │               │
+│ windows.broken_symlinks             │ PASS   │ Check skipped │ No action     │
+│                                     │        │ on            │ required.     │
+│                                     │        │ non-Windows   │               │
+│                                     │        │ platform.     │               │
+│ windows.pip_launcher                │ PASS   │ Check skipped │ No action     │
+│                                     │        │ on            │ required.     │
+│                                     │        │ non-Windows   │               │
+│                                     │        │ platform.     │               │
+│ windows.python_launcher_mismatch    │ PASS   │ Check skipped │ No action     │
+│                                     │        │ on            │ required.     │
+│                                     │        │ non-Windows   │               │
+│                                     │        │ platform.     │               │
+└─────────────────────────────────────┴────────┴───────────────┴───────────────┘
+24 pass 2 warn 2 fail
+scan=03cc8984-a17e-49cc-9f70-2809806825b7 duration_ms=115.63
+exit=0
+$ maxpayne diagnose --profile obeos
+│ windows.broken_symlinks             │ PASS   │ Check skipped │ No action     │
+│                                     │        │ on            │ required.     │
+│                                     │        │ non-Windows   │               │
+│                                     │        │ platform.     │               │
+│ windows.pip_launcher                │ PASS   │ Check skipped │ No action     │
+│                                     │        │ on            │ required.     │
+│                                     │        │ non-Windows   │               │
+│                                     │        │ platform.     │               │
+│ windows.python_launcher_mismatch    │ PASS   │ Check skipped │ No action     │
+│                                     │        │ on            │ required.     │
+│                                     │        │ non-Windows   │               │
+│                                     │        │ platform.     │               │
+│ services.configuration              │ PASS   │ No external   │ Set           │
+│                                     │        │ service       │ MAXPAYNE_SER… │
+│                                     │        │ probes are    │ when OBEOS or │
+│                                     │        │ configured.   │ another       │
+│                                     │        │               │ runtime       │
+│                                     │        │               │ should be     │
+│                                     │        │               │ monitored.    │
+└─────────────────────────────────────┴────────┴───────────────┴───────────────┘
+23 pass 2 warn 2 fail
+scan=a373b87e-d380-4b0c-8555-6e04b3c25554 duration_ms=90.12
+exit=0
+$ maxpayne history --limit 3
+[
+  {
+    "scan_id": "a373b87e-d380-4b0c-8555-6e04b3c25554",
+    "generated_at": "2026-11-02T17:16:59.277882+00:00",
+    "profile": "obeos",
+    "platform": {
+      "is_wsl": false,
+      "python": "3.13.18",
+      "release": "6.18.44-fc-v185",
+      "system": "Linux"
+    },
+    "node": "vm",
+    "summary": {
+      "pass": 23,
+      "warn": 2,
+      "fail": 2
+    },
+    "duration_ms": 90.12
+  },
+  {
+    "scan_id": "03cc8984-a17e-49cc-9f70-2809806825b7",
+    "generated_at": "2026-11-02T17:16:59.000422+00:00",
+    "profile": "workstation",
+    "platform": {
+      "is_wsl": false,
+      "python": "3.13.18",
+      "release": "6.18.44-fc-v185",
+      "system": "Linux"
+    },
+    "node": "vm",
+exit=0
+$ maxpayne report -o /tmp/mp-report.json
+exit=0
+{'scan_id': 'df67379b-940e-4a05-a68d-fcab8b6818f0', 'generated_at': '2026-11-02T17:16:59.698197+00:00', 'profile': 'workstation', 'platform': 'dict', 'node': 'vm', 'overall_status': 'fail', 'summary': 'dict', 'duration_ms': 87.13, 'results': 'list'}
+$ maxpayne diagnose --profile nope
+╭─ Error ──────────────────────────────────────────────────────────────────────╮
+│ Invalid value: Unknown profile: nope. Available profiles: all, minimal,      │
+│ workstation, obeos                                                           │
+╰──────────────────────────────────────────────────────────────────────────────╯
+exit=2
+### 2026-11-02T17:17:24Z remediation gate check (port.free is DESTRUCTIVE; port 9 has no listener)
+$ maxpayne remediate port.free --param port=9 
+{
+  "remediation_id": "port.free",
+  "safety": "DESTRUCTIVE",
+  "dry_run": true,
+  "approved": false,
+  "executed": false,
+  "status": "planned",
+  "message": "Would execute: Terminate the process listening on a local TCP port.",
+exit=0
+$ maxpayne remediate port.free --param port=9 --apply
+{
+  "remediation_id": "port.free",
+  "safety": "DESTRUCTIVE",
+  "dry_run": false,
+  "approved": false,
+  "executed": false,
+  "status": "blocked",
+  "message": "Explicit approval is required.",
+exit=0
+$ maxpayne remediate port.free --param port=9 --apply --approve
+{
+  "remediation_id": "port.free",
+  "safety": "DESTRUCTIVE",
+  "dry_run": false,
+  "approved": true,
+  "executed": false,
+  "status": "blocked",
+  "message": "Destructive remediations are disabled by policy.",
+exit=0
+$ maxpayne remediate env.generate_example
+{
+  "remediation_id": "env.generate_example",
+  "safety": "MUTATING",
+  "dry_run": true,
+  "approved": false,
+  "executed": false,
+exit=0
+### dashboard
+GET / -> 200
+routes: ['/', '/api/diagnose', '/api/health', '/api/history', '/api/remediate/{remediation_id}']
+### build
+!!
+Successfully built maxpayne-0.2.0.tar.gz and maxpayne-0.2.0-py3-none-any.whl
+Checking /tmp/mp-build.gAymHo/dist/maxpayne-0.2.0-py3-none-any.whl: [32mPASSED[0m
+Checking /tmp/mp-build.gAymHo/dist/maxpayne-0.2.0.tar.gz: [32mPASSED[0m
+### clean install
+maxpayne 0.2.0
+True
+3 pass 1 warn 0 fail
+scan=2bd0f7d3-dc3c-4ff6-8fd3-7a4cd36589e3 duration_ms=11.5
+smoke exit=0
+8046e545ae70811add186d60d5e4bf61ef7bb7fc910200235fa20936d5ddd94f  maxpayne-0.2.0-py3-none-any.whl
+d2a56fceaa15a65944ef990eb417420c140b0fb47c74e117c531e1e7b502f896  maxpayne-0.2.0.tar.gz
+/tmp/mp-build.gAymHo
+### 2026-11-02T17:22:51Z service-health probes (live endpoint = maxpayne serve /api/health on 18788; dead endpoint = port 9)
+report exit=0
+PASS services.dashboard - dashboard service is reachable.
+FAIL services.deadsvc - deadsvc service is unreachable.
+FAIL services.secret - secret service is unreachable.
+credential leaked into report: False

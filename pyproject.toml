@@ -19,6 +19,11 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "pytest>=8.2.0",
+  # The API tests import fastapi's TestClient; these are the same pins as the `web` extra
+  # plus the HTTP client Starlette's TestClient requires.
+  "fastapi>=0.115.0",
+  "uvicorn>=0.30.0",
+  "httpx2>=2.0.0",
 ]
 web = [
   "fastapi>=0.115.0",
