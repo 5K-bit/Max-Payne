@@ -5,6 +5,7 @@ import json, logging
 from pathlib import Path
 from rich.panel import Panel
 import typer
+from maxpayne import __version__
 from maxpayne.core.engine import MaxPayneEngine
 from maxpayne.core.history import HistoryStore
 from maxpayne.core.profiles import profile_names
@@ -24,8 +25,16 @@ logger = logging.getLogger(__name__)
 def _default_history_path() -> Path: return Path.home() / ".maxpayne" / "history.db"
 def _engine(*, no_history: bool = False) -> MaxPayneEngine: return MaxPayneEngine(history=None if no_history else HistoryStore(_default_history_path()))
 
+def _version_callback(value: bool) -> None:
+    if value:
+        typer.echo(f"maxpayne {__version__}")
+        raise typer.Exit()
+
 @app.callback()
-def app_callback(debug: bool = typer.Option(False, "--debug", help="Enable debug logging output.")) -> None:
+def app_callback(
+    debug: bool = typer.Option(False, "--debug", help="Enable debug logging output."),
+    version: bool = typer.Option(False, "--version", callback=_version_callback, is_eager=True, help="Show the version and exit."),
+) -> None:
     logging.basicConfig(level=logging.DEBUG if debug else logging.INFO, format="%(levelname)s: %(message)s", force=True)
 
 @app.command()

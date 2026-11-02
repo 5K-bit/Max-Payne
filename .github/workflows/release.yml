@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  # Manual run = build-only rehearsal on a branch: every gate runs, nothing is published.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # Re-runs the full CI matrix on the tagged commit; nothing is published unless it passes.
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    needs: ci
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Read the package version
+        id: ver
+        run: |
+          version="$(python -c "import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+      - name: Check the tag matches the package version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: test "v${{ steps.ver.outputs.version }}" = "${GITHUB_REF_NAME}" || { echo "tag ${GITHUB_REF_NAME} != version ${{ steps.ver.outputs.version }}"; exit 1; }
+      - name: Check release notes exist for this version
+        run: test -s "docs/releases/v${{ steps.ver.outputs.version }}.md"
+      - name: Build sdist and wheel
+        run: |
+          python -m pip install build twine
+          python -m build
+          twine check dist/*
+      - name: Smoke-test the built wheel in a clean environment
+        run: |
+          python -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install dist/*.whl
+          cd "$RUNNER_TEMP"
+          ./venv/bin/maxpayne --version | grep -x "maxpayne ${{ steps.ver.outputs.version }}"
+          ./venv/bin/python -c "import maxpayne, pathlib; assert 'site-packages' in pathlib.Path(maxpayne.__file__).parts"
+          ./venv/bin/maxpayne profiles
+          ./venv/bin/maxpayne diagnose --profile minimal --no-history
+      - name: Run the test suite against the installed wheel
+        run: |
+          "$RUNNER_TEMP/venv/bin/pip" install pytest fastapi uvicorn httpx2
+          mkdir "$RUNNER_TEMP/tests-run" && cp -r tests pyproject.toml "$RUNNER_TEMP/tests-run/"
+          cd "$RUNNER_TEMP/tests-run"
+          "$RUNNER_TEMP/venv/bin/python" -m pytest tests -q -p no:cacheprovider
+      - name: Checksums
+        run: cd dist && sha256sum * > SHA256SUMS && cat SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*
+
+  publish:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: Decide whether this is a prerelease
+        id: pre
+        run: |
+          # 0.x versions and any tag with a suffix (v1.0.0-rc1) are prereleases.
+          if [[ "${GITHUB_REF_NAME}" == v0.* || "${GITHUB_REF_NAME}" == *-* ]]; then echo "value=true" >> "$GITHUB_OUTPUT"; else echo "value=false" >> "$GITHUB_OUTPUT"; fi
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          body_path: docs/releases/${{ github.ref_name }}.md
+          prerelease: ${{ steps.pre.outputs.value }}

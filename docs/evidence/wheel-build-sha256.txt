@@ -1,0 +1,2 @@
+8046e545ae70811add186d60d5e4bf61ef7bb7fc910200235fa20936d5ddd94f  maxpayne-0.2.0-py3-none-any.whl
+d2a56fceaa15a65944ef990eb417420c140b0fb47c74e117c531e1e7b502f896  maxpayne-0.2.0.tar.gz
